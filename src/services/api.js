@@ -1,5 +1,17 @@
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api/v1/adoption-center';
 
+// Extract base server URL (protocol + host) from API_BASE_URL for non-adoption-center endpoints
+const getBaseServerUrl = () => {
+  try {
+    const url = new URL(API_BASE_URL);
+    return `${url.protocol}//${url.host}`;
+  } catch {
+    return 'http://localhost:5000';
+  }
+};
+
+export const BASE_SERVER_URL = getBaseServerUrl();
+
 // Helper function to get auth token
 const getToken = () => {
   return localStorage.getItem('token');
@@ -210,7 +222,7 @@ export const petAPI = {
 
 // Application API
 // NOTE: Routes are mounted at /api/v1/adoption-applications (NOT /adoption-center/applications)
-const ADOPTION_APP_BASE = 'http://localhost:5000/api/v1/adoption-applications';
+const ADOPTION_APP_BASE = `${BASE_SERVER_URL}/api/v1/adoption-applications`;
 
 export const applicationAPI = {
   // Submit a new adoption application (center staff submits on behalf of applicant)
@@ -324,7 +336,7 @@ export const applicationAPI = {
 export const resourcesAPI = {
   getBreeds: async (species = null) => {
     // Resources endpoint is at /api/v1/resources, not under adoption-center
-    const baseUrl = 'http://localhost:5000/api/v1/resources';
+    const baseUrl = `${BASE_SERVER_URL}/api/v1/resources`;
     const url = species
       ? `${baseUrl}/breeds?species=${encodeURIComponent(species)}`
       : `${baseUrl}/breeds`;

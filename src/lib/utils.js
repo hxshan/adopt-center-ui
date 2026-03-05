@@ -1,5 +1,6 @@
 import { clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
+import { BASE_SERVER_URL } from '../services/api';
 
 /**
  * Merges Tailwind class names with full conflict resolution.
@@ -20,10 +21,8 @@ export const cn = (...inputs) => twMerge(clsx(inputs));
  * If the URL is already absolute (http/https) it is returned unchanged.
  * If the URL is falsy, null is returned so the caller can show a fallback.
  */
-const API_ORIGIN = 'http://localhost:5000';
-
 export const getImageUrl = (url) => {
     if (!url) return null;
     if (url.startsWith('http://') || url.startsWith('https://')) return url;
-    return `${API_ORIGIN}${url}`;
+    return `${BASE_SERVER_URL}${url}`;
 };
