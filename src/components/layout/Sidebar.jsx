@@ -125,7 +125,7 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
             <PawPrint className="w-4 h-4 text-white" />
           </div>
           {!collapsed && (
-            <span className="text-lg font-bold text-slate-900 tracking-tight">PawHome</span>
+            <span className="text-lg font-bold text-slate-900 tracking-tight">PetConnect</span>
           )}
 
           {/* Collapse toggle */}

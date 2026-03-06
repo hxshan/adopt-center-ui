@@ -451,7 +451,7 @@ function Signup() {
       <div className="w-full max-w-2xl">
         {/* Header */}
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Adoption Center Registration</h1>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">PetConnect Registration</h1>
           <p className="text-gray-500 text-sm">
             {step === 1 ? 'Step 1 of 2: Admin Information' : 'Step 2 of 2: Center Details'}
           </p>

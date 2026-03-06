@@ -274,7 +274,7 @@ const Settings = () => {
               <Building2 className="w-5 h-5" />
               Organization Information
             </CardTitle>
-            <CardDescription>Manage your adoption center details and public profile.</CardDescription>
+            <CardDescription>Manage your PetConnect details and public profile.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             {orgLoading ? (

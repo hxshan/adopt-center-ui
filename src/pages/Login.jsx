@@ -61,7 +61,7 @@ const Login = ({ onLogin }) => {
         {/* Header */}
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Sign In</h1>
-          <p className="text-gray-500 text-sm">Welcome back to PetCareHub</p>
+          <p className="text-gray-500 text-sm">Welcome back to PetConnect</p>
         </div>
 
         {/* Login Card */}

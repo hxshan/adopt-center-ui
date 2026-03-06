@@ -540,12 +540,62 @@ export const profileAPI = {
   },
 };
 
+const DASHBOARD_BASE = `${BASE_SERVER_URL}/api/v1/adoption-center/dashboard`;
+
+export const reportAPI = {
+  getSummaryStats: async () => {
+    const response = await fetch(`${DASHBOARD_BASE}/reports/summary-stats`, {
+      headers: createHeaders(true),
+    });
+    const result = await response.json();
+    if (!response.ok) throw new Error(result.message || 'Failed to fetch summary stats');
+    return result;
+  },
+
+  getAdoptionTrends: async () => {
+    const response = await fetch(`${DASHBOARD_BASE}/reports/adoption-trends`, {
+      headers: createHeaders(true),
+    });
+    const result = await response.json();
+    if (!response.ok) throw new Error(result.message || 'Failed to fetch adoption trends');
+    return result;
+  },
+
+  getSpeciesDistribution: async () => {
+    const response = await fetch(`${DASHBOARD_BASE}/reports/species-distribution`, {
+      headers: createHeaders(true),
+    });
+    const result = await response.json();
+    if (!response.ok) throw new Error(result.message || 'Failed to fetch species distribution');
+    return result;
+  },
+
+  getApplicationFunnel: async () => {
+    const response = await fetch(`${DASHBOARD_BASE}/reports/application-funnel`, {
+      headers: createHeaders(true),
+    });
+    const result = await response.json();
+    if (!response.ok) throw new Error(result.message || 'Failed to fetch application funnel');
+    return result;
+  },
+
+  getInventoryStatus: async () => {
+    const response = await fetch(`${DASHBOARD_BASE}/reports/inventory-status`, {
+      headers: createHeaders(true),
+    });
+    const result = await response.json();
+    if (!response.ok) throw new Error(result.message || 'Failed to fetch inventory status');
+    return result;
+  },
+};
+
 export default {
   auth: authAPI,
   pet: petAPI,
   applications: applicationAPI,
   resources: resourcesAPI,
   userManagement: userManagementAPI,
-  profile: profileAPI
+  profile: profileAPI,
+  reports: reportAPI,
 };
 

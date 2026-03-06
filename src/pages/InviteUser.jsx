@@ -214,7 +214,7 @@ const InviteUser = () => {
         <div className="mb-8">
           <h1 className="text-xl font-bold text-slate-900">Invite Team Member</h1>
           <p className="text-sm text-slate-400 mt-0.5">
-            Add a new staff member to your adoption center. They will receive an email with their login credentials.
+            Add a new staff member to your PetConnect center. They will receive an email with their login credentials.
           </p>
         </div>
 

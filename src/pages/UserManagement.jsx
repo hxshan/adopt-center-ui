@@ -201,7 +201,7 @@ export default function UserManagement() {
         <div>
           <h1 className="text-3xl font-bold text-slate-900 tracking-tight">User Management</h1>
           <p className="text-slate-500 mt-1">
-            Manage staff members of your adoption center
+            Manage staff members of your PetConnect center
           </p>
         </div>
         <PageActions items={actionItems} />
