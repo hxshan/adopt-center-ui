@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { Dog, Cat, ArrowLeft, Upload, X } from 'lucide-react';
+import { Dog, Cat, ArrowLeft, Upload, X, Plus, Sparkles } from 'lucide-react';
 import { Spinner } from '../components/ui/Spinner';
 import { toast } from 'sonner';
 import { useAppContext } from '../context/AppContext';
@@ -9,6 +9,7 @@ import { validatePetForm } from '../lib/validation';
 import { cn, getImageUrl } from '../lib/utils';
 import FormField from '../components/ui/form-field';
 import { petAPI } from '../services/api';
+import { enhanceDescription } from '../services/openrouter';
 
 // ---------------------------------------------------------------------------
 // Page-local primitives (pet-form specific styling)
@@ -70,7 +71,6 @@ const EditPet = () => {
     breed: '',
     gender: 'Male',
     size: 'Medium',
-    color: '',
     age: '',
     weight: '',
     description: '',
@@ -85,10 +85,14 @@ const EditPet = () => {
     energyLevel: 'Moderate',
   });
 
+  // Multi-color state — populated from pet.colors or pet.color on load
+  const [colors, setColors] = useState(['']);
+
   const [currentPhotos, setCurrentPhotos] = useState([]);
   const [newPhotos, setNewPhotos] = useState([]);
   const [previewUrls, setPreviewUrls] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [enhancingDesc, setEnhancingDesc] = useState(false);
   const [errors, setErrors] = useState({});
 
   // Populate form when pet data is available
@@ -100,7 +104,6 @@ const EditPet = () => {
         breed: pet.breed || '',
         gender: pet.gender || 'Male',
         size: pet.size || 'Medium',
-        color: pet.color || '',
         age: pet.age?.toString() || '',
         weight: pet.weightHistory?.[pet.weightHistory.length - 1]?.weight?.toString() || '',
         description: pet.description || '',
@@ -114,6 +117,16 @@ const EditPet = () => {
         houseTrained: pet.houseTrained || false,
         energyLevel: pet.energyLevel || 'Moderate',
       });
+
+      // Populate colors: prefer pet.colors array, fall back to pet.color string
+      if (pet.colors && pet.colors.length > 0) {
+        setColors(pet.colors);
+      } else if (pet.color) {
+        setColors([pet.color]);
+      } else {
+        setColors(['']);
+      }
+
       setCurrentPhotos(pet.photos || []);
     }
   }, [pet]);
@@ -163,6 +176,21 @@ const EditPet = () => {
     setFormData((prev) => ({ ...prev, breed: val }));
   };
 
+  // ── Color array handlers ──────────────────────────────────────────────────
+  const updateColor = (index, value) => {
+    setColors((prev) => prev.map((c, i) => (i === index ? value : c)));
+  };
+
+  const addColor = () => {
+    if (colors.length < 3) setColors((prev) => [...prev, '']);
+  };
+
+  const removeColor = (index) => {
+    if (colors.length <= 1) return;
+    setColors((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  // ── Photo handlers ────────────────────────────────────────────────────────
   const handlePhotoChange = (e) => {
     const files = Array.from(e.target.files);
     const totalPhotos = currentPhotos.length + newPhotos.length + files.length;
@@ -200,30 +228,50 @@ const EditPet = () => {
     }
   };
 
+  // ── AI description enhancer ───────────────────────────────────────────────
+  const handleEnhance = async () => {
+    if (!formData.description.trim()) return;
+    setEnhancingDesc(true);
+    try {
+      const enhanced = await enhanceDescription(formData.description);
+      setFormData((prev) => ({ ...prev, description: enhanced }));
+    } finally {
+      setEnhancingDesc(false);
+    }
+  };
+
+  // ── Submit ────────────────────────────────────────────────────────────────
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    // Validate form
-    const validation = validatePetForm(formData);
+
+    // Inject primary color from the colors array before Zod checks it
+    const validation = validatePetForm({ ...formData, color: colors.filter(Boolean)[0] || '' });
     if (!validation.success) {
       setErrors(validation.errors);
       window.scrollTo({ top: 0, behavior: 'smooth' });
       toast.error('Please fix the validation errors before submitting');
       return;
     }
-    
+
     setErrors({});
     setIsSubmitting(true);
-    
+
     try {
       const data = new FormData();
       Object.keys(formData).forEach((key) => {
         data.append(key, typeof formData[key] === 'boolean' ? formData[key].toString() : formData[key]);
       });
+
+      // Append colors array as JSON string
+      const filteredColors = colors.filter(Boolean);
+      data.append('colors', JSON.stringify(filteredColors));
+      if (filteredColors.length > 0) {
+        data.set('color', filteredColors[0]);
+      }
+
       currentPhotos.forEach((url) => data.append('existingPhotos', url));
       newPhotos.forEach((photo) => data.append('photos', photo));
-      
-      // Use toast.promise for loading, success, and error states
+
       await toast.promise(
         updatePet(petId, data),
         {
@@ -328,15 +376,47 @@ const EditPet = () => {
                   />
                 </FormField>
 
-                <FormField label="Color" required error={errors.color}>
-                  <PetInput
-                    name="color"
-                    value={formData.color}
-                    onChange={handleChange}
-                    placeholder="e.g., Golden"
-                    error={errors.color}
-                  />
-                </FormField>
+                {/* ── Multi-Color Inputs ──────────────────────────────── */}
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                    Color <span className="text-pink-500 ml-0.5">*</span>
+                  </label>
+                  <div className="flex flex-col gap-2">
+                    {colors.map((c, idx) => (
+                      <div key={idx} className="flex items-center gap-2">
+                        <PetSelect
+                          value={c}
+                          onChange={(e) => updateColor(idx, e.target.value)}
+                          error={idx === 0 && errors.color}
+                        >
+                          <option value="">{idx === 0 ? 'Select primary color…' : 'Select color…'}</option>
+                          {['Black', 'Brown', 'Golden', 'Yellow', 'Cream', 'Gray', 'White'].map(col => (
+                            <option key={col} value={col}>{col}</option>
+                          ))}
+                        </PetSelect>
+                        {colors.length > 1 && (
+                          <button
+                            type="button"
+                            onClick={() => removeColor(idx)}
+                            className="flex-shrink-0 w-7 h-7 flex items-center justify-center rounded-md border border-slate-200 text-slate-400 hover:text-red-500 hover:border-red-300 transition-colors"
+                          >
+                            <X className="w-3.5 h-3.5" />
+                          </button>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                  {colors.length < 3 && (
+                    <button
+                      type="button"
+                      onClick={addColor}
+                      className="mt-2 flex items-center gap-1.5 text-xs text-pink-500 hover:text-pink-700 transition-colors font-medium"
+                    >
+                      <Plus className="w-3.5 h-3.5" />
+                      Add another color
+                    </button>
+                  )}
+                </div>
 
               </div>
             </SectionCard>
@@ -364,6 +444,7 @@ const EditPet = () => {
                   />
                 </FormField>
 
+                {/* Full adoption status dropdown — all 5 options */}
                 <FormField label="Adoption Status" required error={errors.adoptionStatus}>
                   <PetSelect
                     name="adoptionStatus"
@@ -371,9 +452,11 @@ const EditPet = () => {
                     onChange={handleChange}
                     error={errors.adoptionStatus}
                   >
-                    <option>Available</option>
-                    <option>Pending</option>
-                    <option>Adopted</option>
+                    <option value="Available">Available</option>
+                    <option value="Pending">Pending</option>
+                    <option value="On Hold">On Hold</option>
+                    <option value="Medical Care">Medical Care</option>
+                    <option value="Adopted">Adopted</option>
                   </PetSelect>
                 </FormField>
 
@@ -392,7 +475,7 @@ const EditPet = () => {
               )}
               <div className="flex flex-wrap gap-3">
 
-                {/* Existing saved photos — resolve URL against backend origin */}
+                {/* Existing saved photos */}
                 {currentPhotos.map((url, index) => (
                   <div
                     key={`curr-${index}`}
@@ -414,7 +497,7 @@ const EditPet = () => {
                   </div>
                 ))}
 
-                {/* Newly selected photos — blob URL, no transformation needed */}
+                {/* Newly selected photos — pink border indicates not yet saved */}
                 {previewUrls.map((url, index) => (
                   <div
                     key={`new-${index}`}
@@ -459,6 +542,7 @@ const EditPet = () => {
                     <option>Small</option>
                     <option>Medium</option>
                     <option>Large</option>
+                    <option>Extra Large</option>
                   </PetSelect>
                 </FormField>
 
@@ -547,20 +631,39 @@ const EditPet = () => {
             {/* Description */}
             <SectionCard title="Description" hint="Tell potential adopters about this pet's personality.">
               <FormField required error={errors.description}>
-                <textarea
-                  name="description"
-                  value={formData.description}
-                  onChange={handleChange}
-                  rows={4}
-                  placeholder="Describe the pet's personality, habits, and what makes them special..."
-                  className={cn(
-                    'w-full px-3 py-2.5 bg-white border rounded-md text-sm text-slate-800 placeholder-slate-300 resize-none',
-                    'focus:outline-none focus:ring-1 transition-colors',
-                    errors.description
-                      ? 'border-red-400 focus:ring-red-400 focus:border-red-400'
-                      : 'border-slate-200 focus:ring-pink-400 focus:border-pink-400'
-                  )}
-                />
+                <div className="relative">
+                  <textarea
+                    name="description"
+                    value={formData.description}
+                    onChange={handleChange}
+                    rows={8}
+                    placeholder="Describe the pet's personality, habits, and what makes them special..."
+                    className={cn(
+                      'w-full px-3 py-2.5 bg-white border rounded-md text-sm text-slate-800 placeholder-slate-300 resize-none',
+                      'focus:outline-none focus:ring-1 transition-colors',
+                      errors.description
+                        ? 'border-red-400 focus:ring-red-400 focus:border-red-400'
+                        : 'border-slate-200 focus:ring-pink-400 focus:border-pink-400'
+                    )}
+                  />
+                  {/* ✨ AI Enhance Button */}
+                  <button
+                    type="button"
+                    disabled={enhancingDesc || !formData.description.trim()}
+                    onClick={handleEnhance}
+                    title="Enhance"
+                    className={cn(
+                      'absolute bottom-2 right-2 flex items-center justify-center w-8 h-8 rounded-md transition-colors z-10',
+                      'text-pink-500 hover:text-pink-600 hover:bg-pink-50',
+                      'disabled:opacity-40 disabled:cursor-not-allowed'
+                    )}
+                  >
+                    {enhancingDesc
+                      ? <span className="w-4 h-4 border-2 border-pink-400 border-t-transparent rounded-full animate-spin" />
+                      : <Sparkles className="w-4 h-4" />
+                    }
+                  </button>
+                </div>
               </FormField>
             </SectionCard>
 

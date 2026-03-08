@@ -117,12 +117,18 @@ export const petAPI = {
       body: isFormData ? petData : JSON.stringify(petData),
     });
 
-    const result = await response.json();
     if (!response.ok) {
-      throw new Error(result.message || 'Failed to create pet');
+      let errorMessage = 'Failed to create pet';
+      try {
+        const result = await response.json();
+        errorMessage = result.message || errorMessage;
+      } catch (e) {
+        errorMessage = `Server error: ${response.status} ${response.statusText}`;
+      }
+      throw new Error(errorMessage);
     }
 
-    return result;
+    return await response.json();
   },
 
   // Get all pets
@@ -135,12 +141,18 @@ export const petAPI = {
       headers: createHeaders(true),
     });
 
-    const result = await response.json();
     if (!response.ok) {
-      throw new Error(result.message || 'Failed to fetch pets');
+      let errorMessage = 'Failed to fetch pets';
+      try {
+        const result = await response.json();
+        errorMessage = result.message || errorMessage;
+      } catch (e) {
+        errorMessage = `Server error: ${response.status} ${response.statusText}`;
+      }
+      throw new Error(errorMessage);
     }
 
-    return result;
+    return await response.json();
   },
 
   // Get pet by ID
@@ -150,12 +162,18 @@ export const petAPI = {
       headers: createHeaders(true),
     });
 
-    const result = await response.json();
     if (!response.ok) {
-      throw new Error(result.message || 'Failed to fetch pet');
+      let errorMessage = 'Failed to fetch pet';
+      try {
+        const result = await response.json();
+        errorMessage = result.message || errorMessage;
+      } catch (e) {
+        errorMessage = `Server error: ${response.status} ${response.statusText}`;
+      }
+      throw new Error(errorMessage);
     }
 
-    return result;
+    return await response.json();
   },
 
   // Update pet
@@ -173,19 +191,18 @@ export const petAPI = {
       body: isFormData ? petData : JSON.stringify(petData),
     });
 
-    // Check if response is JSON
-    const contentType = response.headers.get('content-type');
-    if (!contentType || !contentType.includes('application/json')) {
-      console.error('Response is not JSON:', await response.text());
-      throw new Error('Server returned non-JSON response');
-    }
-
-    const result = await response.json();
     if (!response.ok) {
-      throw new Error(result.message || 'Failed to update pet');
+      let errorMessage = 'Failed to update pet';
+      try {
+        const result = await response.json();
+        errorMessage = result.message || errorMessage;
+      } catch (e) {
+        errorMessage = `Server error: ${response.status} ${response.statusText}`;
+      }
+      throw new Error(errorMessage);
     }
 
-    return result;
+    return await response.json();
   },
 
   // Delete pet
@@ -195,12 +212,18 @@ export const petAPI = {
       headers: createHeaders(true),
     });
 
-    const result = await response.json();
     if (!response.ok) {
-      throw new Error(result.message || 'Failed to delete pet');
+      let errorMessage = 'Failed to delete pet';
+      try {
+        const result = await response.json();
+        errorMessage = result.message || errorMessage;
+      } catch (e) {
+        errorMessage = `Server error: ${response.status} ${response.statusText}`;
+      }
+      throw new Error(errorMessage);
     }
 
-    return result;
+    return await response.json();
   },
 
   // Remove photo from pet
@@ -211,12 +234,41 @@ export const petAPI = {
       body: JSON.stringify({ photoUrl }),
     });
 
-    const result = await response.json();
     if (!response.ok) {
-      throw new Error(result.message || 'Failed to remove photo');
+      let errorMessage = 'Failed to remove photo';
+      try {
+        const result = await response.json();
+        errorMessage = result.message || errorMessage;
+      } catch (e) {
+        errorMessage = `Server error: ${response.status} ${response.statusText}`;
+      }
+      throw new Error(errorMessage);
     }
 
-    return result;
+    return await response.json();
+  },
+
+  // Quick status-only update (used by Inventory table dropdown)
+  updateStatus: async (id, adoptionStatus) => {
+    const response = await fetch(`${API_BASE_URL}/pets/${id}/status`, {
+      method: 'PATCH',
+      headers: createHeaders(true),
+      body: JSON.stringify({ adoptionStatus }),
+    });
+
+    if (!response.ok) {
+      let errorMessage = 'Failed to update pet status';
+      try {
+        const result = await response.json();
+        errorMessage = result.message || errorMessage;
+      } catch (e) {
+        // Response is not JSON (likely HTML error page)
+        errorMessage = `Server error: ${response.status} ${response.statusText}`;
+      }
+      throw new Error(errorMessage);
+    }
+
+    return await response.json();
   },
 };
 

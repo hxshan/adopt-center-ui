@@ -171,6 +171,20 @@ export const AppProvider = ({ children }) => {
     }
   };
 
+  // Quick status-only update (used by Inventory table — no navigation)
+  const updatePetStatus = async (id, adoptionStatus) => {
+    try {
+      const result = await petAPI.updateStatus(id, adoptionStatus);
+      setPets(prev => prev.map(p => (p._id === id ? { ...p, adoptionStatus } : p)));
+      showToast('Status updated successfully');
+      return result;
+    } catch (error) {
+      showToast(error.message || 'Failed to update status', 'error');
+      console.error('Error updating pet status:', error);
+      throw error;
+    }
+  };
+
   const logout = () => {
     authAPI.logout();
     showToast('Logged out successfully', 'info');
@@ -182,6 +196,7 @@ export const AppProvider = ({ children }) => {
     addPet,
     deletePet,
     updatePet,
+    updatePetStatus,
     fetchPets,
     toast,
     currentPage,

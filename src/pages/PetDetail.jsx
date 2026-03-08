@@ -173,7 +173,9 @@ const PetDetail = () => {
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
                 <div className="bg-gray-50 p-3 rounded-lg text-center">
                   <p className="text-xs text-gray-500 mb-1">Color</p>
-                  <p className="font-semibold text-gray-900 text-sm">{pet.color || 'N/A'}</p>
+                  <p className="font-semibold text-gray-900 text-sm">
+                    {(pet.colors && pet.colors.length > 0 ? pet.colors.join(', ') : pet.color) || 'N/A'}
+                  </p>
                 </div>
                 <div className="bg-gray-50 p-3 rounded-lg text-center">
                   <p className="text-xs text-gray-500 mb-1">Date of Birth</p>

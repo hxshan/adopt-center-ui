@@ -22,7 +22,7 @@ export const petSchema = z.object({
     errorMap: () => ({ message: 'Please select a gender' })
   }),
 
-  size: z.enum(['Small', 'Medium', 'Large'], {
+  size: z.enum(['Small', 'Medium', 'Large', 'Extra Large'], {
     errorMap: () => ({ message: 'Please select a size' })
   }),
 
@@ -32,8 +32,9 @@ export const petSchema = z.object({
       message: 'Weight must be a valid number'
     }),
 
-  color: z.string()
-    .min(1, 'Color is required'),
+  color: z.enum(['Black', 'Brown', 'Golden', 'Yellow', 'Cream', 'Gray', 'White'], {
+    errorMap: () => ({ message: 'Please select a color' }),
+  }),
 
   adoptionFee: z.string()
     .regex(/^\d+(\.\d+)?$/, 'Adoption fee must be a valid number'),
@@ -48,7 +49,7 @@ export const petSchema = z.object({
     errorMap: () => ({ message: 'Please select energy level' })
   }),
 
-  adoptionStatus: z.enum(['Available', 'Pending', 'Adopted'], {
+  adoptionStatus: z.enum(['Available', 'Pending', 'Adopted', 'On Hold', 'Medical Care'], {
     errorMap: () => ({ message: 'Please select adoption status' })
   }).optional(),
 
