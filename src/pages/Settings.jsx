@@ -20,6 +20,7 @@ const Settings = () => {
     lastName: '',
     email: '',
     phone: '',
+    profileImageUrl: '',
   });
 
   // Organization State
@@ -63,6 +64,7 @@ const Settings = () => {
           lastName: user.lastName || '',
           email: user.email || '',
           phone: user.phone || '',
+          profileImageUrl: user.profileImageUrl || '',
         });
       }
     } catch (error) {
@@ -208,7 +210,7 @@ const Settings = () => {
           <CardContent className="space-y-6">
             <div className="flex items-center gap-6">
               <Avatar className="w-20 h-20 border-2 border-slate-100">
-                <AvatarImage src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${userData.email}`} />
+                <AvatarImage src={userData.profileImageUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${userData.email}`} />
                 <AvatarFallback>{getInitials()}</AvatarFallback>
               </Avatar>
               <div>

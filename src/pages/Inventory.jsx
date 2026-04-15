@@ -5,7 +5,7 @@ import { toast } from 'sonner';
 import { Button } from '../components/ui/button';
 import { Badge } from '../components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '../components/ui/avatar';
-import { getImageUrl, cn } from '../lib/utils';
+import { cn } from '../lib/utils';
 import PageActions from '../components/common/PageActions';
 import {
   Table,
@@ -228,7 +228,7 @@ const Inventory = () => {
                   <TableCell className="font-medium">
                     <div className="flex items-center gap-3">
                       <Avatar className="h-10 w-10 border border-slate-200">
-                        <AvatarImage src={getImageUrl(pet.photos?.[0])} alt={pet.name} className="object-cover" />
+                        <AvatarImage src={pet.photosUrls?.[0] || pet.profileImageUrl} alt={pet.name} className="object-cover" />
                         <AvatarFallback>{pet.name.substring(0, 2).toUpperCase()}</AvatarFallback>
                       </Avatar>
                       <div>

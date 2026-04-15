@@ -3,7 +3,6 @@ import { useParams } from 'react-router-dom';
 import { ArrowLeft, Edit, ClipboardList } from 'lucide-react';
 import { PageSpinner } from '../components/ui/Spinner';
 import { useAppContext } from '../context/AppContext';
-import { getImageUrl } from '../lib/utils';
 import api from '../services/api';
 
 const PetDetail = () => {
@@ -46,7 +45,11 @@ const PetDetail = () => {
     );
   }
 
-  const allPhotos = pet.photos && pet.photos.length > 0 ? pet.photos : [pet.imageUrl || ''];
+  const allPhotos = pet.photosUrls && pet.photosUrls.length > 0
+    ? pet.photosUrls
+    : pet.profileImageUrl
+      ? [pet.profileImageUrl]
+      : [];
 
   // Latest weight from weightHistory array
   const latestWeight =
@@ -83,7 +86,7 @@ const PetDetail = () => {
               <div className="aspect-square rounded-xl bg-gray-100 overflow-hidden relative">
                 {allPhotos[activeImage] ? (
                   <img
-                    src={getImageUrl(allPhotos[activeImage])}
+                    src={allPhotos[activeImage]}
                     alt={pet.name}
                     className="w-full h-full object-cover"
                   />
@@ -104,7 +107,7 @@ const PetDetail = () => {
                       }`}
                     >
                       <img
-                        src={getImageUrl(photo)}
+                        src={photo}
                         alt={`Thumbnail ${index + 1}`}
                         className="w-full h-full object-cover"
                       />

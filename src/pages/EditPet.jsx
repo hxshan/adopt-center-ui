@@ -6,7 +6,7 @@ import { toast } from 'sonner';
 import { useAppContext } from '../context/AppContext';
 import BreedAutocomplete from '../components/common/BreedAutocomplete';
 import { validatePetForm } from '../lib/validation';
-import { cn, getImageUrl } from '../lib/utils';
+import { cn } from '../lib/utils';
 import FormField from '../components/ui/form-field';
 import { petAPI } from '../services/api';
 import { enhanceDescription } from '../services/openrouter';
@@ -88,7 +88,10 @@ const EditPet = () => {
   // Multi-color state — populated from pet.colors or pet.color on load
   const [colors, setColors] = useState(['']);
 
-  const [currentPhotos, setCurrentPhotos] = useState([]);
+  // currentPhotoKeys: raw S3 keys (pet.photos) — sent as existingPhotos in FormData
+  // currentPhotoUrls: presigned URLs (pet.photosUrls) — used for display only
+  const [currentPhotoKeys, setCurrentPhotoKeys] = useState([]);
+  const [currentPhotoUrls, setCurrentPhotoUrls] = useState([]);
   const [newPhotos, setNewPhotos] = useState([]);
   const [previewUrls, setPreviewUrls] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -127,7 +130,9 @@ const EditPet = () => {
         setColors(['']);
       }
 
-      setCurrentPhotos(pet.photos || []);
+      // Store raw S3 keys for existingPhotos payload; store presigned URLs for display
+      setCurrentPhotoKeys(pet.photos || []);
+      setCurrentPhotoUrls(pet.photosUrls || []);
     }
   }, [pet]);
 
@@ -193,7 +198,7 @@ const EditPet = () => {
   // ── Photo handlers ────────────────────────────────────────────────────────
   const handlePhotoChange = (e) => {
     const files = Array.from(e.target.files);
-    const totalPhotos = currentPhotos.length + newPhotos.length + files.length;
+    const totalPhotos = currentPhotoKeys.length + newPhotos.length + files.length;
     if (totalPhotos > 5) {
       setErrors((prev) => ({ ...prev, photos: 'Maximum 5 photos allowed' }));
       return;
@@ -216,11 +221,13 @@ const EditPet = () => {
     setPreviewUrls((prev) => prev.filter((_, i) => i !== index));
   };
 
-  const removeCurrentPhoto = async (photoUrl) => {
+  const removeCurrentPhoto = async (index) => {
     try {
       if (confirm('Are you sure you want to remove this photo?')) {
-        await petAPI.removePhoto(petId, photoUrl);
-        setCurrentPhotos((prev) => prev.filter((url) => url !== photoUrl));
+        const photoKey = currentPhotoKeys[index];
+        await petAPI.removePhoto(petId, photoKey);
+        setCurrentPhotoKeys((prev) => prev.filter((_, i) => i !== index));
+        setCurrentPhotoUrls((prev) => prev.filter((_, i) => i !== index));
       }
     } catch (error) {
       console.error('Failed to remove photo', error);
@@ -269,7 +276,8 @@ const EditPet = () => {
         data.set('color', filteredColors[0]);
       }
 
-      currentPhotos.forEach((url) => data.append('existingPhotos', url));
+      // Send raw S3 keys as existingPhotos so the backend keeps those photos
+      currentPhotoKeys.forEach((key) => data.append('existingPhotos', key));
       newPhotos.forEach((photo) => data.append('photos', photo));
 
       await toast.promise(
@@ -475,20 +483,20 @@ const EditPet = () => {
               )}
               <div className="flex flex-wrap gap-3">
 
-                {/* Existing saved photos */}
-                {currentPhotos.map((url, index) => (
+                {/* Existing saved photos — displayed via presigned URLs */}
+                {currentPhotoUrls.map((url, index) => (
                   <div
                     key={`curr-${index}`}
                     className="relative w-28 h-28 rounded-lg overflow-hidden border border-slate-200 group"
                   >
                     <img
-                      src={getImageUrl(url)}
+                      src={url}
                       alt={`Pet photo ${index + 1}`}
                       className="w-full h-full object-cover"
                     />
                     <button
                       type="button"
-                      onClick={() => removeCurrentPhoto(url)}
+                      onClick={() => removeCurrentPhoto(index)}
                       className="absolute top-1.5 right-1.5 w-6 h-6 bg-white/90 text-slate-500 hover:text-red-500 rounded-full flex items-center justify-center transition-colors border border-slate-200 cursor-pointer"
                       title="Remove photo"
                     >
@@ -514,7 +522,7 @@ const EditPet = () => {
                   </div>
                 ))}
 
-                {currentPhotos.length + newPhotos.length < 5 && (
+                {currentPhotoKeys.length + newPhotos.length < 5 && (
                   <label className="w-28 h-28 flex flex-col items-center justify-center border-2 border-dashed border-slate-200 rounded-lg cursor-pointer hover:border-pink-400 hover:bg-pink-50 transition-colors group">
                     <Upload className="w-5 h-5 text-slate-300 group-hover:text-pink-400 transition-colors" />
                     <span className="text-xs text-slate-400 group-hover:text-pink-400 mt-1.5 transition-colors font-medium">

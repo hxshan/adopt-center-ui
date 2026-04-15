@@ -5,7 +5,7 @@ import { toast } from 'sonner';
 import { useParams } from 'react-router-dom';
 import { useAppContext } from '../context/AppContext';
 import { validateAdoptionForm } from '../lib/validation';
-import { cn, getImageUrl } from '../lib/utils';
+import { cn } from '../lib/utils';
 import FormField from '../components/ui/form-field';
 import { Switch } from '../components/ui/switch';
 import { Label } from '../components/ui/label';
@@ -466,9 +466,9 @@ const ApplyForAdoption = () => {
             {/* Pet Preview Card */}
             <SectionCard title="Adopting" hint="The pet being applied for">
               <div className="flex flex-col items-center text-center">
-                {pet.photos?.[0] ? (
+                {pet.photosUrls?.[0] || pet.profileImageUrl ? (
                   <img
-                    src={getImageUrl(pet.photos[0])}
+                    src={pet.photosUrls?.[0] || pet.profileImageUrl}
                     alt={pet.name}
                     className="w-32 h-32 rounded-full object-cover mb-3 border-4 border-pink-50"
                   />

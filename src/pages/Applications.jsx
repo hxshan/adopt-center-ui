@@ -244,9 +244,9 @@ const Applications = () => {
                                         </TableCell>
                                         <TableCell>
                                             <div className="flex items-center gap-2">
-                                                {app.pet?.photos?.[0] ? (
+                                                {app.pet?.photosUrls?.[0] || app.pet?.profileImageUrl ? (
                                                     <img
-                                                        src={app.pet.photos[0]}
+                                                        src={app.pet.photosUrls?.[0] || app.pet.profileImageUrl}
                                                         alt={app.pet?.name}
                                                         className="w-8 h-8 rounded-full object-cover border border-slate-200 flex-shrink-0"
                                                     />

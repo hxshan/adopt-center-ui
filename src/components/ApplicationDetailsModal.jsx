@@ -19,8 +19,8 @@ const ApplicationDetailsModal = ({ application, onClose }) => {
                 <div className="p-6 space-y-6">
                     {/* Applicant & Pet Header */}
                     <div className="flex gap-4 items-start bg-gray-50 p-4 rounded-lg">
-                        {pet?.photos?.[0] && (
-                            <img src={pet.photos[0]} alt={pet.name} className="w-16 h-16 rounded-lg object-cover" />
+                        {(pet?.photosUrls?.[0] || pet?.profileImageUrl) && (
+                            <img src={pet.photosUrls?.[0] || pet.profileImageUrl} alt={pet.name} className="w-16 h-16 rounded-lg object-cover" />
                         )}
                         <div>
                             <h3 className="font-semibold text-lg">{`${applicant?.firstname || ''} ${applicant?.lastname || ''}`.trim() || 'Unknown'} wants to adopt {pet?.name}</h3>

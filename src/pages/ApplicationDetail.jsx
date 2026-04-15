@@ -8,7 +8,7 @@ import { toast } from 'sonner';
 import { Switch } from '../components/ui/switch';
 import { Label } from '../components/ui/label';
 import { Spinner, PageSpinner } from '../components/ui/Spinner';
-import { getImageUrl, cn } from '../lib/utils';
+import { cn } from '../lib/utils';
 import api from '../services/api';
 
 // ---------------------------------------------------------------------------
@@ -362,7 +362,7 @@ export default function ApplicationDetail() {
   }
 
   const { pet, applicant, status, createdAt, reviewedBy, reviewedAt } = application;
-  const petPhoto = getImageUrl(pet?.photos?.[0]);
+  const petPhoto = pet?.photosUrls?.[0] || pet?.profileImageUrl || null;
   const applicantName = `${applicant?.firstname || ''} ${applicant?.lastname || ''}`.trim() || 'Unknown';
   const canAction = ['Pending', 'Under Review', 'Approved'].includes(status);
   const isLocked = ['Adopted', 'Cancelled', 'Withdrawn'].includes(status);

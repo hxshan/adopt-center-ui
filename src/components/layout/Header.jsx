@@ -156,7 +156,7 @@ const Header = ({ setIsOpen, user, onLogout }) => {
               <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-pink-500 to-rose-400 p-[2px]">
                 <div className="w-full h-full rounded-full bg-white flex items-center justify-center">
                   <img
-                    src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${user?.email || 'default'}`}
+                    src={user?.profileImageUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user?.email || 'default'}`}
                     alt="User"
                     className="w-full h-full rounded-full"
                   />
