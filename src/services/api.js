@@ -328,7 +328,7 @@ export const applicationAPI = {
   // Review (approve/reject) an application
   review: async (id, status, reviewNotes) => {
     const response = await fetch(`${ADOPTION_APP_BASE}/center/${id}/review`, {
-      method: 'PATCH',
+      method: 'PUT',
       headers: createHeaders(true),
       body: JSON.stringify({ status, reviewNotes }),
     });
@@ -372,7 +372,7 @@ export const applicationAPI = {
   // Update application details (adoption center — edit form fields and/or applicant)
   updateApplication: async (id, data) => {
     const response = await fetch(`${ADOPTION_APP_BASE}/center/${id}`, {
-      method: 'PATCH',
+      method: 'PUT',
       headers: createHeaders(true),
       body: JSON.stringify(data),
     });
